@@ -19,7 +19,8 @@ module.exports = {
             Bucket: process.env.BUCKET_NAME,
             Key: `texts/${key}`,
             Expires: URL_EXPIRATION_SECONDS,
-            ContentType: 'image/png'
+            ContentType: 'image/png',
+            ACL:'public-read'
         };
 
         try {
