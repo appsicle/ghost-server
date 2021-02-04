@@ -19,7 +19,7 @@ module.exports = {
             Bucket: process.env.BUCKET_NAME,
             Key: `texts/${key}`,
             Expires: URL_EXPIRATION_SECONDS,
-            ContentType: 'image/png',
+            ContentType: 'image/png',   //TODO: dynamically accept png and jpeg
             ACL:'public-read'
         };
 
