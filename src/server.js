@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const s3UploadRouter = require("./routes/s3Upload.router");
 const textMsgsRouter = require("./routes/textMsgs.router");
 const sanityCheckRouter = require("./routes/sanityCheck.router");
+const userRouter = require('./routes/user.router')
 const cors = require("cors");
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use(cors());
 app.use("/", sanityCheckRouter);
 app.use("/api", s3UploadRouter);
 app.use("/api/textMsgs", textMsgsRouter);
+app.use("/api/user", userRouter);
 
 const port = process.env.PORT || 8000;
 app.listen(port, () => {
