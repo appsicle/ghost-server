@@ -25,7 +25,7 @@ module.exports = {
 
         try {
             const uploadURL = s3.getSignedUrl('putObject', s3Params);
-            return { uploadURL, key };
+            return { uploadURL, key: `texts/${key}` };
         } catch (err) {
             console.log(err)
             return { err };
