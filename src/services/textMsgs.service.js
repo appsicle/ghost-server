@@ -36,6 +36,26 @@ module.exports = {
 
     // attach review to current textMsg object
     try {
+      // TODO: use reviewerId to check for dups in the future
+      const findDup = await TextMsgModel.find({
+        _id: textMsgId,
+        reviews: {
+          $elemMatch: {
+            reviewContent: { $elemMatch: { answer: reviewContent[0].answer } },
+          },
+        },
+      });
+
+      if (findDup.length) {
+        console.log("Found duplicate, blocking this request", findDup);
+        return {
+          err: {
+            severity: 3,
+            msg: "Potential duplicate, request blocked",
+          },
+        };
+      }
+
       const confirmedTextMsg = await TextMsgModel.findOneAndUpdate(
         { _id: textMsgId },
         {

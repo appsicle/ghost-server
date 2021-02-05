@@ -42,10 +42,14 @@ router.post('/review', async (req, res, next) => {
 
     const { confirmedTextMsg, err } = await TextMsgsService.review(reviewDTO);
 
+    // TODO: figure out a good error system for services
     if (err){
-        return res.status(500).json({ "err": "sumthing broke :3" })
+        if (!err.severity || err.severity === 0){
+            return res.status(500).json({ "err": "sumthing broke :3" })
+        }else{
+            return res.status(500).json({ "err": err.msg })
+        }
     }
-
     // Return a response to client.
     return res.json({ confirmedTextMsg });
 })
