@@ -35,4 +35,19 @@ router.get('/retrieve/:id', async (req, res, next) => {
     return res.json({ retrievedTextMsg });
 })
 
+router.post('/review', async (req, res, next) => {
+    const reviewDTO = req.body;
+
+    console.log(`Endpoint: "textMsgs/review", recieved: ${JSON.stringify(reviewDTO)}`)
+
+    const { confirmedTextMsg, err } = await TextMsgsService.review(reviewDTO);
+
+    if (err){
+        return res.status(500).json({ "err": "sumthing broke :3" })
+    }
+
+    // Return a response to client.
+    return res.json({ confirmedTextMsg });
+})
+
 module.exports = router
