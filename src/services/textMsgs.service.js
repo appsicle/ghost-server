@@ -9,7 +9,8 @@ module.exports = {
             firstName: firstName,
             email: email,
             additionalInfo: additionalInfo,
-            imageURLs: imageURLs
+            imageURLs: imageURLs,
+            status: "Not Reviewed"
         })
 
         try {
