@@ -1,4 +1,5 @@
 const TextMsgModel = require("../models/textMsgs.schema");
+const sendGridService = require("../services/sendGrid.service");
 
 module.exports = {
   save: async (id, textMsgsDTO) => {
@@ -31,24 +32,27 @@ module.exports = {
     }
   },
   review: async (reviewDTO) => {
-    // TODO: send email via sendgrid
-    const { textMsgId, reviewerId, reviewText } = reviewDTO;
+    const { textMsgId, reviewContent, imageURLs } = reviewDTO;
 
     // attach review to current textMsg object
     try {
-      const confirmedTextMsg = await TextMsgModel.updateOne(
+      const confirmedTextMsg = await TextMsgModel.findOneAndUpdate(
         { _id: textMsgId },
         {
-          $push: { reviews: { reviewerId: reviewerId, review: reviewText } },
+          $push: {
+            reviews: { reviewerId: "whateverfornow", reviewContent, reviewerPics: imageURLs },
+          },
           $set: { status: "reviewed" },
-        }
+        },
+        { new: true }
       );
+
+      sendGridService.sendEmail(confirmedTextMsg.email, imageURLs, reviewContent);
+
       return { confirmedTextMsg };
     } catch (err) {
       console.log(err);
       return { err };
     }
-
-
   },
 };

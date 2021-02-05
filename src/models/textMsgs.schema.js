@@ -11,7 +11,8 @@ const textMsgSchema = new mongoose.Schema({
     type: [
       {
         reviewerId: String,
-        review: String,
+        reviewContent: [{ question: String, answer: String }],
+        reviewerPics: [String]
       },
     ],
     default: [],
