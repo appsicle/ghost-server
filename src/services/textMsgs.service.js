@@ -23,7 +23,7 @@ module.exports = {
   },
   retrieve: async (id) => {
     try {
-      const retrievedTextMsg = await TextMsgModel.findOne({ userId: id });
+      const retrievedTextMsg = await TextMsgModel.findOne({ _id: id });
       return { retrievedTextMsg };
     } catch (err) {
       console.log(err);
@@ -49,6 +49,6 @@ module.exports = {
       return { err };
     }
 
-    
+
   },
 };
