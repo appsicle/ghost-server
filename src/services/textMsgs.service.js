@@ -47,7 +47,7 @@ module.exports = {
         { new: true }
       );
 
-      sendGridService.sendEmail(confirmedTextMsg.email, imageURLs, reviewContent);
+      sendGridService.sendEmail(confirmedTextMsg.email, confirmedTextMsg.additionalInfo, confirmedTextMsg.imageURLs, imageURLs, reviewContent);
 
       return { confirmedTextMsg };
     } catch (err) {
