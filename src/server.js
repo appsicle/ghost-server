@@ -10,6 +10,7 @@ const sanityCheckRouter = require("./routes/sanityCheck.router");
 const userRouter = require('./routes/user.router')
 const authRouter = require('./routes/auth.router');
 const cors = require("cors");
+const bodyParser = require("body-parser");
 
 var app = express();
 
@@ -24,6 +25,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(bodyParser.json())
 app.use(sessionMiddleware.session)
 
 // routes

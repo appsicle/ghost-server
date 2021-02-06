@@ -8,6 +8,11 @@ router.get("/", (req, res) => {
 });
 
 // sanity check
+router.post("/", (req, res) => {
+  res.status(200).json({ message: req.body });
+});
+
+// sanity check
 router.get("/testSendGrid", (req, res) => {
   sendGridService.sendEmail(
     "",
@@ -27,7 +32,7 @@ router.get("/testSession", (req, res) => {
   console.log(req.session);
   console.log(req.session.id);
   console.log(req.session.cookie);
-  res.status(200).json({ message: req.session.views });
+  res.status(200).json({ message: req.session });
 });
 
 module.exports = router;
