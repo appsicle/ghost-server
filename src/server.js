@@ -5,6 +5,7 @@ const s3UploadRouter = require("./routes/s3Upload.router");
 const textMsgsRouter = require("./routes/textMsgs.router");
 const sanityCheckRouter = require("./routes/sanityCheck.router");
 const userRouter = require('./routes/user.router')
+const authRouter = require('./routes/auth.router');
 const cors = require("cors");
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use(cors());
 // routes
 app.use("/", sanityCheckRouter);
 app.use("/api", s3UploadRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/textMsgs", textMsgsRouter);
 app.use("/api/user", userRouter);
 
