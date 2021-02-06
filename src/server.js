@@ -1,14 +1,15 @@
 const express = require("express");
-const dotenv = require("dotenv");
+require("dotenv").config();
 const mongoose = require("mongoose");
+
+const sessionMiddleware = require("./middleware/session.middleware")
+
 const s3UploadRouter = require("./routes/s3Upload.router");
 const textMsgsRouter = require("./routes/textMsgs.router");
 const sanityCheckRouter = require("./routes/sanityCheck.router");
 const userRouter = require('./routes/user.router')
 const authRouter = require('./routes/auth.router');
 const cors = require("cors");
-
-dotenv.config();
 
 var app = express();
 
@@ -23,6 +24,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(sessionMiddleware.session)
 
 // routes
 app.use("/", sanityCheckRouter);
