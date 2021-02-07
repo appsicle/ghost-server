@@ -6,7 +6,10 @@ const userSchema = new mongoose.Schema({
   name: String,
   email: String,
   role: String,
+  status: { type: String, default: 'newUser' },
 });
+
+// TODO: document valid user statuses or use enums
 
 const userModel = mongoose.model('user', userSchema);
 

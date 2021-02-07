@@ -1,6 +1,6 @@
 const axios = require("axios");
 const { v4: uuid } = require('uuid');
-const userModel = require("../models/user.schema");
+const UserModel = require("../models/user.schema");
 
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -17,4 +17,7 @@ module.exports = {
     const userid = payload["sub"];
     return payload;
   },
+  attach: (sessionId) => {
+
+  }
 };
