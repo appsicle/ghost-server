@@ -23,18 +23,25 @@ const _create = async (userDTO) => {
 
 module.exports = {
   createWithGoogle: async (googleDTO) => {
-    const { googleId, name, email } = googleDTO;
+    const { googleId, name, email, role } = googleDTO;
 
     // validation
     if (!googleId || !name || !email) {
       throw 'Missing parameters';
     }
 
-    await _create({ googleId, name, email });
+    console.log('role got was ', role)
+
+    if (role !== 'REVIEWER' && role !== 'REVIEWEE') {
+      throw 'Invalid role';
+    }
+
+    await _create({ googleId, name, email, role });
   },
   retrieveWithGoogleId: async (googleId) => {
     try {
       const retrievedUser = await UserModel.findOne({ googleId: googleId });
+      console.log(retrievedUser);
       return { retrievedUser };
     } catch (err) {
       console.log(err);

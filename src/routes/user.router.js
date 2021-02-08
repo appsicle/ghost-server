@@ -32,4 +32,16 @@ router.post('/retrieve', async (req, res, next) => {
     return res.json({ retrievedUser });
 })
 
+router.get('/role', async (req, res) => {
+  if (!req.session.user || !req.session.user.role) {
+    console.log('sending visitor');
+    console.log(req.session.user);
+    res.send('VISITOR');
+  } else {
+    console.log('sending not visitor');
+    console.log(req.session);
+    res.send(req.session.user.role);
+  }
+})
+
 module.exports = router
