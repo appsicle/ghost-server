@@ -6,6 +6,7 @@ const sessionService = require('../services/session.service');
 
 router.post('/googleSignin', async (req, res) => {
   const token = req.body.idToken; // TODO: send this over header instead
+  const role = req.body.desiredRole;
 
   console.log("googlesignin", req.body)
 
@@ -31,6 +32,7 @@ router.post('/googleSignin', async (req, res) => {
       googleId,
       name,
       email,
+      role
     });
     if (err) {
       res.status(500).json({ err: `failed to create user: ${err}` });
