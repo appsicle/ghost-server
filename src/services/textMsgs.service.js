@@ -110,5 +110,34 @@ module.exports = {
       console.log(err)
       throw `error: ${err}`
     }
+  },
+  _clearReviewerFromAll: async (reviewerUserId, seenArray = false, reviewArray = false) => {
+    console.log(reviewerUserId, seenArray, reviewArray)
+    try {
+
+      let retrievedTextMsg;
+      if (seenArray) {
+        retrievedTextMsg = await TextMsgModel.updateMany(
+          {},
+          { $pull: { seenBy: reviewerUserId } }
+        );
+      }
+
+      let retrievedTextMsg2;
+      if (reviewArray) {
+        retrievedTextMsg2 = await TextMsgModel.updateMany(
+          {},
+          { $pull: { reviews: { reviewId: reviewerUserId } } }
+        );
+      }
+
+      console.log(retrievedTextMsg, retrievedTextMsg2)
+
+
+      return { retrievedTextMsg, retrievedTextMsg2 };
+    } catch (err) {
+      console.log(err)
+      throw `error: ${err}`
+    }
   }
 };

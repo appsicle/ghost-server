@@ -2,6 +2,8 @@ var express = require('express')
 var router = express.Router()
 const TextMsgsService = require('../services/textMsgs.service')
 
+const DEBUG = true;
+
 // TODO: get id based on user auth
 router.post('/submit/:id', async (req, res, next) => {
     const id = req.params.id;
@@ -66,7 +68,29 @@ router.post('/getNext', async (req, res, next) => {
 
         // fetch next textMsg
         const retrievedTextMsg = await TextMsgsService.retrieveNext(req.session.user.userId, lastTextMsgId);
-        
+
+        console.log(retrievedTextMsg)
+        return res.json(retrievedTextMsg);
+    } catch (err) {
+        res.status(500).json({ "err": "sumthing broke :3" })
+    }
+})
+
+router.post('/_clear', async (req, res, next) => {
+
+    if (!DEBUG) {
+        return res.status(404)
+    }
+
+    console.log(`Endpoint: "_clearSeen", recieved body: ${JSON.stringify(req.body)}`)
+
+
+    const { reviewerId, seen, review } = req.body;
+
+    try {
+        // fetch next textMsg
+        const retrievedTextMsg = await TextMsgsService._clearReviewerFromAll(reviewerId, seen, review)
+
         console.log(retrievedTextMsg)
         return res.json(retrievedTextMsg);
     } catch (err) {
