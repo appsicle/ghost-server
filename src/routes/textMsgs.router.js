@@ -6,12 +6,12 @@ const TextMsgsService = require('../services/textMsgs.service')
 router.post('/submit/:id', async (req, res, next) => {
     const id = req.params.id;
     const textMsgsDTO = req.body;
-    
+
     console.log(`Endpoint: "textMsgs/submit/id", recieved: ${id} ${JSON.stringify(textMsgsDTO)}`)
 
     const { confirmedTextMsg, err } = await TextMsgsService.save(id, textMsgsDTO);
-    
-    if (err){
+
+    if (err) {
         return res.status(500).json({ "err": "sumthing broke :3" })
     }
 
@@ -27,7 +27,7 @@ router.get('/retrieve/:id', async (req, res, next) => {
 
     const { retrievedTextMsg, err } = await TextMsgsService.retrieve(id);
 
-    if (err){
+    if (err) {
         return res.status(500).json({ "err": "sumthing broke :3" })
     }
 
@@ -43,15 +43,35 @@ router.post('/review', async (req, res, next) => {
     const { confirmedTextMsg, err } = await TextMsgsService.review(reviewDTO);
 
     // TODO: figure out a good error system for services
-    if (err){
-        if (!err.severity || err.severity === 0){
+    if (err) {
+        if (!err.severity || err.severity === 0) {
             return res.status(500).json({ "err": "sumthing broke :3" })
-        }else{
+        } else {
             return res.status(500).json({ "err": err.msg })
         }
     }
     // Return a response to client.
     return res.json({ confirmedTextMsg });
+})
+
+router.post('/getNext', async (req, res, next) => {
+    console.log(`Endpoint: "textMsgs/retrieve", recieved body: ${JSON.stringify(req.body)}`)
+
+    const { lastTextMsgId } = req.body;
+
+    try {
+        // validate user 
+        if (!req.session.user)
+            return res.status(403).json({ "err": "Expired session, login again" })
+
+        // fetch next textMsg
+        const retrievedTextMsg = await TextMsgsService.retrieveNext(req.session.user.userId, lastTextMsgId);
+        
+        console.log(retrievedTextMsg)
+        return res.json(retrievedTextMsg);
+    } catch (err) {
+        res.status(500).json({ "err": "sumthing broke :3" })
+    }
 })
 
 module.exports = router

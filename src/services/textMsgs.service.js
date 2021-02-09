@@ -75,4 +75,40 @@ module.exports = {
       return { err };
     }
   },
+  retrieveNext: async (reviewerUserId, lastRetrievedTextMsgId) => {
+    console.log(reviewerUserId, lastRetrievedTextMsgId)
+    try {
+
+      // Fetch a text message that the reviewer hasn't seen before
+      let retrievedTextMsg;
+      if (lastRetrievedTextMsgId) { // pagination speed up if available
+        retrievedTextMsg = await TextMsgModel.findOneAndUpdate(
+          { _id: { $gt: lastRetrievedTextMsgId }, seenBy: { $ne: reviewerUserId }, "reviews.reviewerId": { $ne: reviewerUserId } },
+          {
+            $push: {
+              seenBy: reviewerUserId,
+            },
+          },
+          { new: true }
+        );
+      } else {
+        retrievedTextMsg = await TextMsgModel.findOneAndUpdate(
+          { seenBy: { $ne: reviewerUserId }, "reviews.reviewerId": { $ne: reviewerUserId } },
+          {
+            $push: {
+              seenBy: reviewerUserId,
+            },
+          },
+          { new: true }
+        );
+      }
+
+      // TODO: project only relevant fields
+
+      return retrievedTextMsg;
+    } catch (err) {
+      console.log(err)
+      throw `error: ${err}`
+    }
+  }
 };
