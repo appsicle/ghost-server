@@ -5,6 +5,7 @@ const TextMsgsService = require('../services/textMsgs.service')
 const { wrapAsync } = require('../middleware/errorHandler.middleware')
 const { body, param } = require('express-validator');
 const { validate, isObjectId } = require('../middleware/expressValidator.middleware')
+const DEBUG = true;
 
 // TODO: get id based on user auth
 router.post('/submit/:id',
@@ -73,13 +74,14 @@ router.post('/review',
         const confirmedTextMsg = await TextMsgsService.review(reviewDTO);
 
         return res.json({ confirmedTextMsg });
-    }))
+    })
+)
 
 router.post('/getNext',
     validate([
         body("lastTextMsgId").optional().custom(isObjectId),
     ]),
-    wrapAsync(async (req, res, next) => {
+    wrapAsync(async (req, res) => {
         console.log(`Endpoint: "textMsgs/retrieve", recieved body: ${JSON.stringify(req.body)}`)
 
         const { lastTextMsgId } = req.body;
@@ -94,6 +96,37 @@ router.post('/getNext',
 
         console.log(retrievedTextMsg)
         return res.json(retrievedTextMsg);
-    }))
+    })
+)
+
+router.post('/_clear',
+    validate([
+        body("reviewerId")
+            .exists().withMessage("required").bail()
+            .custom(isObjectId),
+        body("seen")
+            .optional()
+            .isBoolean(),
+        body("review")
+            .optional()
+            .isBoolean()
+    ]),
+    wrapAsync(async (req, res) => {
+
+        if (!DEBUG) {
+            return res.status(404)
+        }
+
+        console.log(`Endpoint: "_clearSeen", recieved body: ${JSON.stringify(req.body)}`)
+
+        const { reviewerId, seen, review } = req.body;
+
+        // fetch next textMsg
+        const retrievedTextMsg = await TextMsgsService._clearReviewerFromAll(reviewerId, seen, review)
+
+        console.log(retrievedTextMsg)
+        return res.json(retrievedTextMsg);
+    })
+)
 
 module.exports = router
