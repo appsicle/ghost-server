@@ -1,27 +1,24 @@
 const aws = require("aws-sdk");
+const { v4: uuid } = require("uuid");
+const { BadInputError } = require('../errors')
+
+// obfuscated allowlist
+const bucketMap = {
+  "reviewerProfilePic": "profilePic",
+  "textMsgs": "textMsgs",
+};
 
 module.exports = {
   getSignedURL: async (getSignedURLDTO) => {
     const { contentType, bucket } = getSignedURLDTO;
-    const fileExtension = contentType.split(/\//)[1];
+    const fileExtension = contentType?.split(/\//)[1];
 
-    // obfuscated allowlist
-    const bucketMap = {
-      "reviewerProfilePic": "profilePic",
-      "textMsgs": "textMsgs",
-    };
+    if (!fileExtension) {
+      throw new BadInputError(`Recieved unexpected content-type: ${fileExtension}`);
+    }
 
     if (!bucketMap[bucket]) {
-      console.log(
-        `Include bucket, inputed: ${bucket}, expected ${Object.keys(bucketMap).join(
-          ","
-        )}`
-      );
-      return {
-        err: `Include bucket, inputed: ${bucket}, expected ${Object.keys(bucketMap).join(
-          ","
-        )}`,
-      };
+      throw new BadInputError(`Include bucket, inputed: ${bucket}, expected ${Object.keys(bucketMap).join(",")}`);
     }
 
     aws.config.setPromisesDependency();
@@ -33,24 +30,17 @@ module.exports = {
 
     const s3 = new aws.S3();
     const URL_EXPIRATION_SECONDS = 300;
-    const randomID = parseInt(Math.random() * 10000000);
-    const key = `${randomID}.${fileExtension}`;
+    const fileExtention = `${bucketMap[bucket]}/${uuid()}.${fileExtension}`;
 
-    // Get signed URL from S3
     const s3Params = {
       Bucket: process.env.BUCKET_NAME,
-      Key: `${bucketMap[bucket]}/${key}`,
+      Key: fileExtention,
       Expires: URL_EXPIRATION_SECONDS,
-      ContentType: `${contentType}`, //TODO: dynamically accept png and jpeg
+      ContentType: `${contentType}`,
       ACL: "public-read",
     };
 
-    try {
-      const uploadURL = s3.getSignedUrl("putObject", s3Params);
-      return { uploadURL, key: `${bucketMap[bucket]}/${key}` };
-    } catch (err) {
-      console.log(err);
-      return { err };
-    }
+    const uploadURL = s3.getSignedUrl("putObject", s3Params);
+    return { uploadURL, key: fileExtention };
   },
 };

@@ -30,9 +30,8 @@ module.exports = {
     
       <body>
         <div style="display: flex; flex-flow: column; align-items: center;">
-          <a href=${
-            process.env.EMAIL_FEEDBACK_FORM
-          }><h1>Pre-Alpha testing: Please take this survey after you have read your results.</h1></a>
+          <a href=${process.env.EMAIL_FEEDBACK_FORM
+        }><h1>Pre-Alpha testing: Please take this survey after you have read your results.</h1></a>
         </div>
         <hr />
         <div style="display: flex; flex-flow: column; align-items: center;">
@@ -57,27 +56,26 @@ module.exports = {
             "
           >
           ${textMsgPics.map(
-            (pic) =>
-              `<img
+          (pic) =>
+            `<img
             style="padding: 16px"
             height="400px"
             src=${pic}
           />`
-          ).join('')}
+        ).join('')}
           </div>
-          ${
-            additionalInfo
-              ? `<h2>Additional Information</h2>
+          ${additionalInfo
+          ? `<h2>Additional Information</h2>
             <p>${additionalInfo}</p>`
-              : ""
-          }
+          : ""
+        }
         </div>
         <hr />
         <div style="display: flex; flex-flow: column; align-items: center;">
           <h1>Feedback from the reviewer</h1>
           <ol>
             ${reviewContent.map(
-              (qna) => `<li>
+          (qna) => `<li>
                 <h3>
                     ${qna.question}
                 </h3>
@@ -85,7 +83,7 @@ module.exports = {
                     ${qna.answer}
                 </p>
               </li>`
-            ).join('')}
+        ).join('')}
           </ol>
         </div>
       </body>
@@ -97,7 +95,7 @@ module.exports = {
         console.log("Email sent");
       })
       .catch((error) => {
-        console.error(JSON.stringify(error));
+        throw error
       });
   },
 };

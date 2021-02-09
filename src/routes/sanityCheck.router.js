@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const sendGridService = require("../services/sendGrid.service");
+const {BadInputError} = require('../errors')
 
 // sanity check
 router.get("/", (req, res) => {
@@ -10,6 +11,10 @@ router.get("/", (req, res) => {
 // sanity check
 router.post("/", (req, res) => {
   res.status(200).json({ message: req.body });
+});
+
+router.get("/error", (req, res) => {
+  throw new BadInputError("testy");
 });
 
 // sanity check

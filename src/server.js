@@ -11,6 +11,7 @@ const userRouter = require('./routes/user.router');
 const authRouter = require('./routes/auth.router');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { errorHandler } = require('./middleware/errorHandler.middleware')
 
 var app = express();
 
@@ -40,6 +41,9 @@ app.use('/api', s3UploadRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/textMsgs', textMsgsRouter);
 app.use('/api/user', userRouter);
+
+// error handler
+app.use(errorHandler);
 
 const port = process.env.PORT || 8000;
 app.listen(port, () => {
