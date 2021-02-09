@@ -2,6 +2,7 @@ var express = require('express')
 var router = express.Router()
 const UserService = require('../services/user.service')
 
+const { wrapAsync } = require('../middleware/errorHandler.middleware')
 const { body, custom } = require('express-validator');
 const { validate, isObjectId } = require('../middleware/expressValidator.middleware')
 
@@ -28,23 +29,19 @@ router.post('/retrieve',
       .exists().withMessage("required").bail()
       .custom(isObjectId),
   ]),
-  async (req, res, next) => {
+  wrapAsync(async (req, res, next) => {
     const userDTO = req.body;
 
     console.log(`Endpoint: "user/retrieve", recieved: ${JSON.stringify(userDTO)}`)
 
-    const { retrievedUser, err } = await UserService.retrieve(userDTO);
+    const retrievedUser = await UserService.retrieve(userDTO);
+    //TODO: dne considered an error?
 
-    if (err) {
-      return res.status(500).json({ "err": "sumthing broke :3" })
-    }
-
-    // Return a response to client.
     return res.json({ retrievedUser });
-  })
+  }))
 
 router.get('/role',
-  async (req, res) => {
+  (req, res) => {
     if (!req.session.user || !req.session.user.role) {
       console.log('sending visitor');
       console.log(req.session.user);

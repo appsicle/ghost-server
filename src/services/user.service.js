@@ -12,13 +12,8 @@ const _create = async (userDTO) => {
     status,
   });
 
-  try {
-    const confirmedUser = await userInstance.save();
-    return { confirmedUser };
-  } catch (err) {
-    console.log(err);
-    return { err };
-  }
+  const confirmedUser = await userInstance.save();
+  return { confirmedUser };
 };
 
 module.exports = {
@@ -26,37 +21,28 @@ module.exports = {
     const { googleId, name, email, role } = googleDTO;
 
     // validation
-    if (!googleId || !name || !email) {
-      throw 'Missing parameters';
+    if (!googleId || !name || !email || !role) {
+      // TODO: might be bad to leak google id here
+      throw new BadInputError(`Missing parameters: googleId, name, email, role`);
     }
 
     console.log('role got was ', role)
 
     if (role !== 'REVIEWER' && role !== 'REVIEWEE') {
-      throw 'Invalid role';
+      throw new BadInputError(`Invalid role`);
     }
 
     await _create({ googleId, name, email, role });
   },
   retrieveWithGoogleId: async (googleId) => {
-    try {
-      const retrievedUser = await UserModel.findOne({ googleId: googleId });
-      console.log(retrievedUser);
-      return { retrievedUser };
-    } catch (err) {
-      console.log(err);
-      return { err };
-    }
+    const retrievedUser = await UserModel.findOne({ googleId: googleId });
+    console.log(retrievedUser);
+    return retrievedUser;
   },
   retrieve: async (userDTO) => {
     const { userId } = userDTO;
 
-    try {
-      const retrievedUser = await UserModel.findOne({ userId: userId });
-      return { retrievedUser };
-    } catch (err) {
-      console.log(err);
-      return { err };
-    }
+    const retrievedUser = await UserModel.findOne({ userId: userId });
+    return retrievedUser;
   },
 };
