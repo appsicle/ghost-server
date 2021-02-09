@@ -7,6 +7,9 @@ const userSchema = new mongoose.Schema({
   email: String,
   role: String,
   status: { type: String, default: 'newUser' },
+  age: Number,
+  ethnicty: String,
+  location: String 
 });
 
 // TODO: document valid user statuses or use enums

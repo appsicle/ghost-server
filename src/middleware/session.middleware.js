@@ -9,7 +9,7 @@ module.exports = {
     cookie: { secure: false },
     store: new MongoStore({
       url: process.env.MONGODB_URI,
-      maxAge: 24 * 60 * 60 * 1000 // 24hours
+      ttl: 24 * 60 * 60 // 1 day
     }),
   }),
 };

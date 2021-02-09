@@ -11,12 +11,13 @@ const textMsgSchema = new mongoose.Schema({
     type: [
       {
         reviewerId: String,
+        reviewerPic: String,
         reviewContent: [{ question: String, answer: String }],
-        reviewerPics: [String]
       },
     ],
     default: [],
   },
+  seenBy: { type: [String], default: [] }
 });
 
 const textMsgModel = mongoose.model("textMsg", textMsgSchema);
