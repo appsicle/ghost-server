@@ -7,13 +7,13 @@ class StatusCodeError extends Error {
 
 class BadInputError extends StatusCodeError {
     constructor(message) {
-        super(message, 400);
+        super(400, message);
     }
 }
 
 class NoAccessError extends StatusCodeError {
     constructor(message) {
-        super(message, 403);
+        super(403, message);
     }
 }
 

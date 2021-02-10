@@ -6,6 +6,8 @@ const { wrapAsync } = require('../middleware/errorHandler.middleware')
 const { body, custom } = require('express-validator');
 const { validate, isObjectId } = require('../middleware/expressValidator.middleware')
 
+const { isLoggedIn } = require('../middleware/auth.middleware')
+
 // TODO: deprecate or for debugging use only
 // router.post('/create',
 //   async (req, res, next) => {
@@ -24,6 +26,7 @@ const { validate, isObjectId } = require('../middleware/expressValidator.middlew
 //   })
 
 router.post('/retrieve',
+  isLoggedIn,
   validate([
     body("userId")
       .exists().withMessage("required").bail()
@@ -40,7 +43,9 @@ router.post('/retrieve',
     return res.json({ retrievedUser });
   }))
 
+// TODO: May need updating
 router.get('/role',
+  isLoggedIn,
   (req, res) => {
     if (!req.session.user || !req.session.user.role) {
       console.log('sending visitor');
