@@ -8,7 +8,11 @@ const { body, param } = require('express-validator');
 const { validate, isObjectId } = require('../middleware/expressValidator.middleware')
 const DEBUG = true;
 
+const { isLoggedIn, hasRole } = require('../middleware/auth.middleware')
+
 router.post('/submit',
+    isLoggedIn,
+    hasRole("REVIEWEE"),
     validate([
         body("firstName")
             .exists().withMessage("required").bail()
@@ -40,6 +44,7 @@ router.post('/submit',
 
 // TODO: get id based on user auth
 router.get('/retrieve/:id',
+    isLoggedIn,
     validate([
         param("id")
             .exists().withMessage("required").bail()
@@ -56,6 +61,8 @@ router.get('/retrieve/:id',
     }))
 
 router.post('/review',
+    isLoggedIn,
+    hasRole("REVIEWER"),
     validate([
         body("textMsgId")
             .exists().withMessage("required").bail()
@@ -79,6 +86,8 @@ router.post('/review',
 )
 
 router.post('/getNext',
+    isLoggedIn,
+    hasRole("REVIEWER"),
     validate([
         body("lastTextMsgId").optional().custom(isObjectId),
     ]),

@@ -6,7 +6,10 @@ const { wrapAsync } = require('../middleware/errorHandler.middleware');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/expressValidator.middleware')
 
+const { isLoggedIn } = require('../middleware/auth.middleware')
+
 router.post('/getSignedURL',
+    isLoggedIn,
     validate([
         body("contentType")
             .exists().withMessage("required").bail()
