@@ -11,7 +11,14 @@ class BadInputError extends StatusCodeError {
     }
 }
 
+class NoAccessError extends StatusCodeError {
+    constructor(message) {
+        super(message, 403);
+    }
+}
+
 module.exports = {
     StatusCodeError,
-    BadInputError
+    BadInputError,
+    NoAccessError
 }

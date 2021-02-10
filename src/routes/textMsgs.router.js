@@ -2,17 +2,14 @@ var express = require('express')
 var router = express.Router()
 const TextMsgsService = require('../services/textMsgs.service')
 
+const { NoAccessError } = require('../errors')
 const { wrapAsync } = require('../middleware/errorHandler.middleware')
 const { body, param } = require('express-validator');
 const { validate, isObjectId } = require('../middleware/expressValidator.middleware')
 const DEBUG = true;
 
-// TODO: get id based on user auth
-router.post('/submit/:id',
+router.post('/submit',
     validate([
-        param("id")
-            .exists().withMessage("required").bail()
-            .custom(isObjectId),
         body("firstName")
             .exists().withMessage("required").bail()
             .isString().notEmpty(),
@@ -27,12 +24,16 @@ router.post('/submit/:id',
             .isArray().notEmpty(),
     ]),
     wrapAsync(async (req, res) => {
-        const id = req.params.id;
         const textMsgsDTO = req.body;
 
-        console.log(`Endpoint: "textMsgs/submit/id", recieved: ${id} ${JSON.stringify(textMsgsDTO)}`)
+        // TODO: make this a middleware check
+        if (!req.session.user) {
+            throw new NoAccessError("Please log in again")
+        }
 
-        const confirmedTextMsg = await TextMsgsService.save(id, textMsgsDTO);
+        console.log(`Endpoint: "textMsgs/submit", recieved: ${JSON.stringify(textMsgsDTO)}`)
+
+        const confirmedTextMsg = await TextMsgsService.save(req.session.user.userId, textMsgsDTO);
 
         return res.json({ confirmedTextMsg });
     }))
@@ -89,7 +90,7 @@ router.post('/getNext',
         // TODO: middleware to check for user in session
         // validate user 
         if (!req.session.user)
-            return res.status(403).json({ "err": "Expired session, login again" })
+            throw new NoAccessError("Please log in again")
 
         // fetch next textMsg
         const retrievedTextMsg = await TextMsgsService.retrieveNext(req.session.user.userId, lastTextMsgId);
