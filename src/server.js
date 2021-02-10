@@ -30,6 +30,8 @@ app.use(
     origin: 'https://noghost.netlify.app',
     credentials: true,
     exposedHeaders: ['set-cookie'],
+    allowedHeaders: ['Accept', 'Accept-Language','Content-Language',
+    'Content-Type','Authorization','Cookie','X-Requested-With','Origin','Host']
   }),
 );
 app.use(bodyParser.json());
