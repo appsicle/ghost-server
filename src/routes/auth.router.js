@@ -29,7 +29,7 @@ router.post('/googleSignin',
     user = await userService.retrieveWithGoogleId(googleId);
     if (!user) {
       // TODO: redirect?
-      throw new StatusCodeError(403, "User does not have an account")
+      throw new NoAccessError("Please register for an account")
     }
 
     // attach user to session

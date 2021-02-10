@@ -3,11 +3,11 @@ const TextMsgModel = require("../models/textMsgs.schema");
 const sendGridService = require("../services/sendGrid.service");
 
 module.exports = {
-  save: async (id, textMsgsDTO) => {
+  save: async (revieweeId, textMsgsDTO) => {
     const { firstName, email, additionalInfo, imageURLs } = textMsgsDTO;
 
     const textMsgInstance = new TextMsgModel({
-      userId: id,
+      userId: revieweeId,
       firstName: firstName,
       email: email,
       additionalInfo: additionalInfo,
