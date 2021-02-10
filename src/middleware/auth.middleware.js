@@ -2,6 +2,8 @@ const { NoAccessError } = require('../errors')
 
 const isLoggedIn = (req, res, next) => {
     if (!req.session.user) {
+        console.log('ERROR HERE, NO USER FOUND.');
+        console.log(req.session);
         throw new NoAccessError("Not logged in")
     }
     next()
