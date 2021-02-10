@@ -30,11 +30,6 @@ router.post('/submit',
     wrapAsync(async (req, res) => {
         const textMsgsDTO = req.body;
 
-        // TODO: make this a middleware check
-        if (!req.session.user) {
-            throw new NoAccessError("Please log in again")
-        }
-
         console.log(`Endpoint: "textMsgs/submit", recieved: ${JSON.stringify(textMsgsDTO)}`)
 
         const confirmedTextMsg = await TextMsgsService.save(req.session.user.userId, textMsgsDTO);

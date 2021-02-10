@@ -43,6 +43,7 @@ router.post('/retrieve',
     return res.json({ retrievedUser });
   }))
 
+// TODO: May need updating
 router.get('/role',
   isLoggedIn,
   (req, res) => {
