@@ -11,7 +11,7 @@ const bucketMap = {
 module.exports = {
   getSignedURL: async (getSignedURLDTO) => {
     const { contentType, bucket } = getSignedURLDTO;
-    const fileExtension = contentType?.split(/\//)[1];
+    const fileExtension = contentType ? contentType.split(/\//)[1] : null;
 
     if (!fileExtension) {
       throw new BadInputError(`Recieved unexpected content-type: ${fileExtension}`);

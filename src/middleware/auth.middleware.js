@@ -12,8 +12,8 @@ const hasRole = (role) => {
         throw `Expected ["REVIEWER", "REVIEWEE"] but found ${role}`
     }
     return (req, res, next) => {
-        if (req.session?.user?.role != role) {
-            throw new NoAccessError(`Expected ${role} but found ${req.session?.user?.role}`)
+        if (!req.session.user || !req.session.user.role || req.session.user.role != role) {
+            throw new NoAccessError(`Cannot find role`)
         }
         next()
     }
