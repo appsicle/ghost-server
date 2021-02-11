@@ -91,4 +91,14 @@ router.post('/googleSignup',
     });
   }));
 
+
+router.get('/logout',
+  wrapAsync(async (req, res) => {
+    console.log('logout');
+
+    req.session.destroy()
+
+    res.status(200).send();
+  }));
+
 module.exports = router;
