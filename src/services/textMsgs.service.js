@@ -3,16 +3,21 @@ const TextMsgModel = require("../models/textMsgs.schema");
 const sendGridService = require("../services/sendGrid.service");
 
 module.exports = {
-  save: async (revieweeId, textMsgsDTO) => {
-    const { firstName, email, additionalInfo, imageURLs } = textMsgsDTO;
+  save: async (userObj, additionalInfo, imageURLs) => {
+    const { userId, name, email, age, ethnicity, location } = userObj;
 
     const textMsgInstance = new TextMsgModel({
-      userId: revieweeId,
-      firstName: firstName,
-      email: email,
+      revieweeObj: {
+        userId: userId,
+        name: name,
+        email: email,
+        age: age,
+        ethnicity: ethnicity,
+        location: location,
+      },
       additionalInfo: additionalInfo,
       imageURLs: imageURLs,
-      status: "Not Reviewed", // TODO: formalize possible statuses
+      status: "Not Reviewed", // TODO: formalize possible statuses or deprecate
     });
 
     const confirmedTextMsg = await textMsgInstance.save();
@@ -22,21 +27,10 @@ module.exports = {
     const retrievedTextMsg = await TextMsgModel.findOne({ _id: id });
     return retrievedTextMsg;
   },
-  review: async (reviewDTO) => {
-    const { textMsgId, reviewContent, imageURLs } = reviewDTO;
+  review: async (reviewerObj, textMsgId, reviewContent) => {
+    const { userId, name, profilePic } = reviewerObj;
 
-    // attach review to current textMsg object
-
-    // TODO: use reviewerId to check for dups in the future
-    const findDup = await TextMsgModel.find({
-      _id: textMsgId,
-      reviews: {
-        $elemMatch: {
-          reviewContent: { $elemMatch: { answer: reviewContent[0].answer } },
-        },
-      },
-    });
-
+    const findDup = await TextMsgModel.find({ _id: textMsgId });
     if (findDup.length) {
       console.log("Found duplicate, blocking this request", findDup);
       throw new StatusCodeError(409, "Duplicate entry")
@@ -46,16 +40,15 @@ module.exports = {
       { _id: textMsgId },
       {
         $push: {
-          reviews: { reviewerId: "whateverfornow", reviewContent, reviewerPics: imageURLs },
+          reviews: {
+            reviewerObj: { userId, name, profilePic },
+            reviewContent
+          }
         },
         $set: { status: "reviewed" },
       },
       { new: true }
     );
-
-    // TODO: deprecate usage
-    // TODO: should probably in the router instead of nested in here
-    // sendGridService.sendEmail(confirmedTextMsg.email, confirmedTextMsg.additionalInfo, confirmedTextMsg.imageURLs, imageURLs, reviewContent);
 
     return { confirmedTextMsg };
   },
@@ -67,21 +60,21 @@ module.exports = {
     if (lastRetrievedTextMsgId) { // pagination speed up if available
       retrievedTextMsg = await TextMsgModel.findOneAndUpdate(
         { _id: { $gt: lastRetrievedTextMsgId }, seenBy: { $ne: reviewerUserId }, "reviews.reviewerId": { $ne: reviewerUserId } },
-        {
-          $push: {
-            seenBy: reviewerUserId,
-          },
-        },
+        { $push: { seenBy: reviewerUserId } },
         { new: true }
       );
+      // wrap around search
+      if (retrievedTextMsg.length === 0) {
+        retrievedTextMsg = await TextMsgModel.findOneAndUpdate(
+          { seenBy: { $ne: reviewerUserId }, "reviews.reviewerId": { $ne: reviewerUserId } },
+          { $push: { seenBy: reviewerUserId } },
+          { new: true }
+        );
+      }
     } else {
       retrievedTextMsg = await TextMsgModel.findOneAndUpdate(
         { seenBy: { $ne: reviewerUserId }, "reviews.reviewerId": { $ne: reviewerUserId } },
-        {
-          $push: {
-            seenBy: reviewerUserId,
-          },
-        },
+        { $push: { seenBy: reviewerUserId } },
         { new: true }
       );
     }

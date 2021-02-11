@@ -54,13 +54,13 @@ router.post('/googleSignup',
   ]),
   wrapAsync(async (req, res) => {
     const token = req.body.idToken; // TODO: send this over header instead
-    const role = req.body.desiredRole;
+    const { role } = req.body;
 
-    console.log('googlesignin', req.body);
+    console.log('googlesignin');
 
     // verify token
     const { sub: googleId, name, email } = await authService.verifyToken(token);
-    console.log('verify token', googleId);
+    console.log('verify token');
 
     // check for existing user
     let user;

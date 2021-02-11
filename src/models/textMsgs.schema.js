@@ -1,17 +1,25 @@
 const mongoose = require("mongoose");
 
 const textMsgSchema = new mongoose.Schema({
-  userId: String,
-  firstName: String,
-  email: String,
+  revieweeObj: {
+    userId: String,
+    name: String,
+    email: String,
+    age: Number,
+    ethnicity: String,
+    location: String
+  },
   additionalInfo: String,
   imageURLs: [String],
   status: String,
   reviews: {
     type: [
       {
-        reviewerId: String,
-        reviewerPic: String,
+        reviewerObj: {
+          userId: String,
+          name: String,
+          profilePic: String,
+        },
         reviewContent: [{ question: String, answer: String }],
       },
     ],

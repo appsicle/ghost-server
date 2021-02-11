@@ -2,11 +2,9 @@ var express = require('express')
 var router = express.Router()
 const TextMsgsService = require('../services/textMsgs.service')
 
-const { NoAccessError } = require('../errors')
 const { wrapAsync } = require('../middleware/errorHandler.middleware')
-const { body, param } = require('express-validator');
+const { body, query } = require('express-validator');
 const { validate, isObjectId } = require('../middleware/expressValidator.middleware')
-const DEBUG = true;
 
 const { isLoggedIn, hasRole } = require('../middleware/auth.middleware')
 
@@ -14,12 +12,6 @@ router.post('/submit',
     isLoggedIn,
     hasRole("REVIEWEE"),
     validate([
-        body("firstName")
-            .exists().withMessage("required").bail()
-            .isString().notEmpty(),
-        body("email")
-            .exists().withMessage("required").bail()
-            .isString().notEmpty(),
         body("additionalInfo")
             .exists().withMessage("required").bail()
             .isString(),
@@ -28,29 +20,28 @@ router.post('/submit',
             .isArray().notEmpty(),
     ]),
     wrapAsync(async (req, res) => {
-        const textMsgsDTO = req.body;
+        const { additionalInfo, imageURLs } = req.body;
 
-        console.log(`Endpoint: "textMsgs/submit", recieved: ${JSON.stringify(textMsgsDTO)}`)
+        console.log(`Endpoint: "textMsgs/submit", recieved: ${JSON.stringify(req.body)}`)
 
-        const confirmedTextMsg = await TextMsgsService.save(req.session.user.userId, textMsgsDTO);
+        const confirmedTextMsg = await TextMsgsService.save(req.session.user, additionalInfo, imageURLs);
 
         return res.json({ confirmedTextMsg });
     }))
 
-// TODO: get id based on user auth
-router.get('/retrieve/:id',
+router.get('/retrieve',
     isLoggedIn,
     validate([
-        param("id")
+        query("textMsgId")
             .exists().withMessage("required").bail()
             .custom(isObjectId)
     ]),
     wrapAsync(async (req, res) => {
-        const id = req.params.id
+        const { textMsgId } = req.query
 
-        console.log(`Endpoint: "textMsgs/retrieve/id", recieved: ${id}`)
+        console.log(`Endpoint: "textMsgs/retrieve", recieved: ${textMsgId}`)
 
-        const retrievedTextMsg = await TextMsgsService.retrieve(id);
+        const retrievedTextMsg = await TextMsgsService.retrieve(textMsgId);
 
         return res.json({ retrievedTextMsg });
     }))
@@ -65,16 +56,13 @@ router.post('/review',
         body("reviewContent")
             .exists().withMessage("required").bail()
             .isArray(),
-        body("imageURLs")
-            .exists().withMessage("required").bail()
-            .isArray(),
     ]),
     wrapAsync(async (req, res) => {
-        const reviewDTO = req.body;
+        const { textMsgId, reviewContent } = req.body;
 
         console.log(`Endpoint: "textMsgs/review", recieved: ${JSON.stringify(reviewDTO)}`)
 
-        const confirmedTextMsg = await TextMsgsService.review(reviewDTO);
+        const confirmedTextMsg = await TextMsgsService.review(req.session.user, textMsgId, reviewContent);
 
         return res.json({ confirmedTextMsg });
     })
@@ -91,11 +79,6 @@ router.post('/getNext',
 
         const { lastTextMsgId } = req.body;
 
-        // TODO: middleware to check for user in session
-        // validate user 
-        if (!req.session.user)
-            throw new NoAccessError("Please log in again")
-
         // fetch next textMsg
         const retrievedTextMsg = await TextMsgsService.retrieveNext(req.session.user.userId, lastTextMsgId);
 
@@ -104,11 +87,11 @@ router.post('/getNext',
     })
 )
 
+// TODO: find a way to keep this admin only
 router.post('/_clear',
     validate([
         body("reviewerId")
-            .exists().withMessage("required").bail()
-            .custom(isObjectId),
+            .exists().withMessage("required").bail(),
         body("seen")
             .optional()
             .isBoolean(),
@@ -118,11 +101,7 @@ router.post('/_clear',
     ]),
     wrapAsync(async (req, res) => {
 
-        if (!DEBUG) {
-            return res.status(404)
-        }
-
-        console.log(`Endpoint: "_clearSeen", recieved body: ${JSON.stringify(req.body)}`)
+        console.log(`Endpoint: "_clear", recieved body: ${JSON.stringify(req.body)}`)
 
         const { reviewerId, seen, review } = req.body;
 

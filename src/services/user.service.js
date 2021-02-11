@@ -2,7 +2,7 @@ const UserModel = require('../models/user.schema');
 const { v4: uuid } = require('uuid');
 
 const _create = async (userDTO) => {
-  const { userId = uuid(), googleId, name, email, role, status } = userDTO;
+  const { userId = uuid(), googleId, name, email, role, status, age, ethnicity, location, profilePic } = userDTO;
   const userInstance = new UserModel({
     userId,
     googleId,
@@ -10,6 +10,10 @@ const _create = async (userDTO) => {
     email,
     role,
     status,
+    age,
+    ethnicity,
+    location,
+    profilePic
   });
 
   const confirmedUser = await userInstance.save();
@@ -22,7 +26,6 @@ module.exports = {
 
     // validation
     if (!googleId || !name || !email || !role) {
-      // TODO: might be bad to leak google id here
       throw new BadInputError(`Missing parameters: googleId, name, email, role`);
     }
 
@@ -39,9 +42,7 @@ module.exports = {
     console.log(retrievedUser);
     return retrievedUser;
   },
-  retrieve: async (userDTO) => {
-    const { userId } = userDTO;
-
+  retrieve: async (userId) => {
     const retrievedUser = await UserModel.findOne({ userId: userId });
     return retrievedUser;
   },

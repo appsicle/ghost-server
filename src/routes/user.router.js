@@ -8,23 +8,6 @@ const { validate, isObjectId } = require('../middleware/expressValidator.middlew
 
 const { isLoggedIn } = require('../middleware/auth.middleware')
 
-// TODO: deprecate or for debugging use only
-// router.post('/create',
-//   async (req, res, next) => {
-//     const userDTO = req.body;
-
-//     console.log(`Endpoint: "user/create", recieved: ${JSON.stringify(userDTO)}`)
-
-//     const { confirmedUser, err } = await UserService.create(userDTO);
-
-//     if (err) {
-//       return res.status(500).json({ "err": "sumthing broke :3" })
-//     }
-
-//     // Return a response to client.
-//     return res.json({ confirmedUser });
-//   })
-
 router.post('/retrieve',
   isLoggedIn,
   validate([
@@ -32,12 +15,12 @@ router.post('/retrieve',
       .exists().withMessage("required").bail()
       .custom(isObjectId),
   ]),
-  wrapAsync(async (req, res, next) => {
-    const userDTO = req.body;
+  wrapAsync(async (req, res) => {
+    const { userId } = req.body;
 
-    console.log(`Endpoint: "user/retrieve", recieved: ${JSON.stringify(userDTO)}`)
+    console.log(`Endpoint: "user/retrieve", recieved: ${JSON.stringify(req.body)}`)
 
-    const retrievedUser = await UserService.retrieve(userDTO);
+    const retrievedUser = await UserService.retrieve(userId);
     //TODO: dne considered an error?
 
     return res.json({ retrievedUser });

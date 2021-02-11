@@ -9,7 +9,7 @@ const { validate } = require('../middleware/expressValidator.middleware')
 const { isLoggedIn } = require('../middleware/auth.middleware')
 
 router.post('/getSignedURL',
-    isLoggedIn,
+    // isLoggedIn,  // TODO: public access, need to find a better solution later
     validate([
         body("contentType")
             .exists().withMessage("required").bail()
@@ -19,7 +19,6 @@ router.post('/getSignedURL',
             .isIn(["reviewerProfilePic", "textMsgs"]).withMessage("Supported buckets: reviewerProfilePic, textMsgs"),
     ]),
     wrapAsync(async (req, res) => {
-        // TODO: auth
         const getSignedURLDTO = req.body;
         console.log(`Endpoint: "getSignedURL", recieved: ${JSON.stringify(getSignedURLDTO)}`)
 
