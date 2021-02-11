@@ -37,8 +37,8 @@ router.post('/googleSignin',
     console.log('session attached');
 
     res.status(200).json({
-      name: user.name,
-      email: user.email,
+      name: user.name, 
+      profilePic: user.profilePic,
       role: user.role,
     });
   }));
@@ -90,8 +90,8 @@ router.post('/googleSignup',
     console.log('session attached');
 
     res.status(200).json({
-      // name: user.name, // what is user here?
-      // email: user.email,
+      name: user.name, 
+      profilePic: user.profilePic,
       role: user.role,
     });
   }));
