@@ -3,6 +3,7 @@ const { StatusCodeError } = require('../errors')
 // Standard error msg format
 const errorHandler = (error, req, res, next) => {
     if (error instanceof StatusCodeError) {
+        console.error(error)
         res.status(error.statusCode).json({ errors: [{ msg: error.message }] })
     } else {
         next(error)

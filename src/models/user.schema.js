@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   email: String,
   role: String,
   status: { type: String, default: 'newUser' },
+  bio: String,
   age: Number,
   ethnicty: String,
   location: String,
