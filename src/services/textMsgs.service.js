@@ -30,7 +30,7 @@ module.exports = {
   review: async (reviewerObj, textMsgId, reviewContent) => {
     const { userId, name, profilePic } = reviewerObj;
 
-    const findDup = await TextMsgModel.find({ _id: textMsgId });
+    const findDup = await TextMsgModel.find({ 'reviews.reviewerObj.userId': userId });
     if (findDup.length) {
       console.log("Found duplicate, blocking this request", findDup);
       throw new StatusCodeError(409, "Duplicate entry")
@@ -99,7 +99,7 @@ module.exports = {
       if (reviewArray) {
         retrievedTextMsg2 = await TextMsgModel.updateMany(
           {},
-          { $pull: { reviews: { reviewId: reviewerUserId } } }
+          { $pull: { reviews: { "reviewerObj.userId": reviewerUserId } } }
         );
       }
 

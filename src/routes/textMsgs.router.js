@@ -60,7 +60,7 @@ router.post('/review',
     wrapAsync(async (req, res) => {
         const { textMsgId, reviewContent } = req.body;
 
-        console.log(`Endpoint: "textMsgs/review", recieved: ${JSON.stringify(reviewDTO)}`)
+        console.log(`Endpoint: "textMsgs/review", recieved: ${JSON.stringify(req.body)}`)
 
         const confirmedTextMsg = await TextMsgsService.review(req.session.user, textMsgId, reviewContent);
 
