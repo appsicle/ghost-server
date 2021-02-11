@@ -27,11 +27,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: 'https://noghost.netlify.app',
+    origin: true,
     credentials: true,
     exposedHeaders: ['set-cookie'],
-    allowedHeaders: ['Accept', 'Accept-Language','Content-Language',
-    'Content-Type','Authorization','Cookie','X-Requested-With','Origin','Host']
   }),
 );
 app.use(bodyParser.json());
