@@ -9,10 +9,12 @@ const userSchema = new mongoose.Schema({
   status: { type: String, default: 'newUser' },
   bio: String,
   age: Number,
-  ethnicty: String,
+  ethnicity: String,
   location: String,
   profilePic: String,
-});
+},
+  { timestamps: true }
+);
 
 // TODO: document valid user statuses or use enums
 

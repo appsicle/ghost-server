@@ -26,7 +26,9 @@ const textMsgSchema = new mongoose.Schema({
     default: [],
   },
   seenBy: { type: [String], default: [] }
-});
+},
+  { timestamps: true }
+);
 
 const textMsgModel = mongoose.model("textMsg", textMsgSchema);
 
