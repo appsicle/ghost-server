@@ -7,7 +7,7 @@ const sessionService = require('../services/session.service');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/expressValidator.middleware')
 const { wrapAsync } = require('../middleware/errorHandler.middleware');
-const { StatusCodeError } = require('../errors');
+const { StatusCodeError, NoAccessError } = require('../errors');
 
 router.post('/googleSignin',
   validate([

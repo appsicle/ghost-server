@@ -87,6 +87,18 @@ router.post('/getNext',
     })
 )
 
+router.get('/reviews',
+  isLoggedIn,
+  hasRole("REVIEWEE"),
+  wrapAsync(async (req, res) => {
+    const userId = req.session.user.userId;
+    console.log(req.session.user);
+    const pastSubmissions = await TextMsgsService.retrieveSubmissionsForUser(userId);
+    return res.json(pastSubmissions);
+  })
+)
+
+
 // TODO: find a way to keep this admin only
 router.post('/_clear',
     validate([

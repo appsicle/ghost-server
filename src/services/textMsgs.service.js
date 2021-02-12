@@ -1,6 +1,6 @@
-const { StatusCodeError } = require("../errors");
-const TextMsgModel = require("../models/textMsgs.schema");
-const sendGridService = require("../services/sendGrid.service");
+const { StatusCodeError } = require('../errors');
+const TextMsgModel = require('../models/textMsgs.schema');
+const sendGridService = require('../services/sendGrid.service');
 
 module.exports = {
   save: async (userObj, additionalInfo, imageURLs) => {
@@ -17,7 +17,7 @@ module.exports = {
       },
       additionalInfo: additionalInfo,
       imageURLs: imageURLs,
-      status: "Not Reviewed", // TODO: formalize possible statuses or deprecate
+      status: 'Not Reviewed', // TODO: formalize possible statuses or deprecate
     });
 
     const confirmedTextMsg = await textMsgInstance.save();
@@ -30,10 +30,12 @@ module.exports = {
   review: async (reviewerObj, textMsgId, reviewContent) => {
     const { userId, name, profilePic } = reviewerObj;
 
-    const findDup = await TextMsgModel.find({ 'reviews.reviewerObj.userId': userId });
+    const findDup = await TextMsgModel.find({
+      'reviews.reviewerObj.userId': userId,
+    });
     if (findDup.length) {
-      console.log("Found duplicate, blocking this request", findDup);
-      throw new StatusCodeError(409, "Duplicate entry")
+      console.log('Found duplicate, blocking this request', findDup);
+      throw new StatusCodeError(409, 'Duplicate entry');
     }
 
     const confirmedTextMsg = await TextMsgModel.findOneAndUpdate(
@@ -42,40 +44,51 @@ module.exports = {
         $push: {
           reviews: {
             reviewerObj: { userId, name, profilePic },
-            reviewContent
-          }
+            reviewContent,
+          },
         },
-        $set: { status: "reviewed" },
+        $set: { status: 'reviewed' },
       },
-      { new: true }
+      { new: true },
     );
 
     return { confirmedTextMsg };
   },
   retrieveNext: async (reviewerUserId, lastRetrievedTextMsgId) => {
-    console.log(reviewerUserId, lastRetrievedTextMsgId)
+    console.log(reviewerUserId, lastRetrievedTextMsgId);
 
     // Fetch a text message that the reviewer hasn't seen before
     let retrievedTextMsg;
-    if (lastRetrievedTextMsgId) { // pagination speed up if available
+    if (lastRetrievedTextMsgId) {
+      // pagination speed up if available
       retrievedTextMsg = await TextMsgModel.findOneAndUpdate(
-        { _id: { $gt: lastRetrievedTextMsgId }, seenBy: { $ne: reviewerUserId }, "reviews.reviewerId": { $ne: reviewerUserId } },
+        {
+          _id: { $gt: lastRetrievedTextMsgId },
+          seenBy: { $ne: reviewerUserId },
+          'reviews.reviewerId': { $ne: reviewerUserId },
+        },
         { $push: { seenBy: reviewerUserId } },
-        { new: true }
+        { new: true },
       );
       // wrap around search
       if (retrievedTextMsg.length === 0) {
         retrievedTextMsg = await TextMsgModel.findOneAndUpdate(
-          { seenBy: { $ne: reviewerUserId }, "reviews.reviewerId": { $ne: reviewerUserId } },
+          {
+            seenBy: { $ne: reviewerUserId },
+            'reviews.reviewerId': { $ne: reviewerUserId },
+          },
           { $push: { seenBy: reviewerUserId } },
-          { new: true }
+          { new: true },
         );
       }
     } else {
       retrievedTextMsg = await TextMsgModel.findOneAndUpdate(
-        { seenBy: { $ne: reviewerUserId }, "reviews.reviewerId": { $ne: reviewerUserId } },
+        {
+          seenBy: { $ne: reviewerUserId },
+          'reviews.reviewerId': { $ne: reviewerUserId },
+        },
         { $push: { seenBy: reviewerUserId } },
-        { new: true }
+        { new: true },
       );
     }
 
@@ -83,15 +96,21 @@ module.exports = {
 
     return retrievedTextMsg;
   },
-  _clearReviewerFromAll: async (reviewerUserId, seenArray = false, reviewArray = false) => {
-    console.log(reviewerUserId, seenArray, reviewArray)
+  retrieveSubmissionsForUser: async (revieweeUserId) => {
+    return TextMsgModel.find({"revieweeObj.userId": revieweeUserId});
+  },
+  _clearReviewerFromAll: async (
+    reviewerUserId,
+    seenArray = false,
+    reviewArray = false,
+  ) => {
+    console.log(reviewerUserId, seenArray, reviewArray);
     try {
-
       let retrievedTextMsg;
       if (seenArray) {
         retrievedTextMsg = await TextMsgModel.updateMany(
           {},
-          { $pull: { seenBy: reviewerUserId } }
+          { $pull: { seenBy: reviewerUserId } },
         );
       }
 
@@ -99,17 +118,16 @@ module.exports = {
       if (reviewArray) {
         retrievedTextMsg2 = await TextMsgModel.updateMany(
           {},
-          { $pull: { reviews: { "reviewerObj.userId": reviewerUserId } } }
+          { $pull: { reviews: { 'reviewerObj.userId': reviewerUserId } } },
         );
       }
 
-      console.log(retrievedTextMsg, retrievedTextMsg2)
-
+      console.log(retrievedTextMsg, retrievedTextMsg2);
 
       return { retrievedTextMsg, retrievedTextMsg2 };
     } catch (err) {
-      console.log(err)
-      throw `error: ${err}`
+      console.log(err);
+      throw `error: ${err}`;
     }
-  }
+  },
 };
