@@ -25,8 +25,13 @@ const textMsgSchema = new mongoose.Schema({
     ],
     default: [],
   },
-  seenBy: { type: [String], default: [] }
-});
+  seenBy: { type: [String], default: [] },
+  inappropriateFlag: [String],
+  needsMoreContextFlag: [String],
+  skippedFlag: [String],
+},
+  { timestamps: true }
+);
 
 const textMsgModel = mongoose.model("textMsg", textMsgSchema);
 
