@@ -87,6 +87,31 @@ router.post('/getNext',
     })
 )
 
+router.post('/flag',
+    isLoggedIn,
+    hasRole("REVIEWER"),
+    validate([
+        body("textMsgId")
+            .exists().withMessage("required").bail()
+            .custom(isObjectId),
+        body("category")
+            .exists().withMessage("required").bail()
+            .isString()
+            .isIn(["inappropriate", "needs more context", "skip"]),
+    ]),
+    wrapAsync(async (req, res) => {
+        console.log(`Endpoint: "textMsgs/flag", recieved body: ${JSON.stringify(req.body)}`)
+
+        const { textMsgId, category } = req.body;
+
+        // fetch next textMsg
+        const retrievedTextMsg = await TextMsgsService.flag(req.session.user.userId, textMsgId, category);
+
+        console.log(retrievedTextMsg)
+        return res.json(retrievedTextMsg);
+    })
+)
+
 // TODO: find a way to keep this admin only
 router.post('/_clear',
     validate([
@@ -97,16 +122,25 @@ router.post('/_clear',
             .isBoolean(),
         body("review")
             .optional()
+            .isBoolean(),
+        body("inappropriateFlag")
+            .optional()
+            .isBoolean(),
+        body("needsMoreContextFlag")
+            .optional()
+            .isBoolean(),
+        body("skippedFlag")
+            .optional()
             .isBoolean()
     ]),
     wrapAsync(async (req, res) => {
 
         console.log(`Endpoint: "_clear", recieved body: ${JSON.stringify(req.body)}`)
 
-        const { reviewerId, seen, review } = req.body;
+        const { reviewerId, seen, review, inappropriateFlag, needsMoreContextFlag, skippedFlag } = req.body;
 
         // fetch next textMsg
-        const retrievedTextMsg = await TextMsgsService._clearReviewerFromAll(reviewerId, seen, review)
+        const retrievedTextMsg = await TextMsgsService._clearReviewerFromAll(reviewerId, seen, review, inappropriateFlag, needsMoreContextFlag, skippedFlag)
 
         console.log(retrievedTextMsg)
         return res.json(retrievedTextMsg);

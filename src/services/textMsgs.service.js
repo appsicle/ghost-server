@@ -1,4 +1,4 @@
-const { StatusCodeError } = require("../errors");
+const { StatusCodeError, BadInputError } = require("../errors");
 const TextMsgModel = require("../models/textMsgs.schema");
 const sendGridService = require("../services/sendGrid.service");
 
@@ -30,7 +30,7 @@ module.exports = {
   review: async (reviewerObj, textMsgId, reviewContent) => {
     const { userId, name, profilePic } = reviewerObj;
 
-    const findDup = await TextMsgModel.find({ 'reviews.reviewerObj.userId': userId });
+    const findDup = await TextMsgModel.find({ _id: textMsgId, 'reviews.reviewerObj.userId': userId });
     if (findDup.length) {
       console.log("Found duplicate, blocking this request", findDup);
       throw new StatusCodeError(409, "Duplicate entry")
@@ -83,8 +83,39 @@ module.exports = {
 
     return retrievedTextMsg;
   },
-  _clearReviewerFromAll: async (reviewerUserId, seenArray = false, reviewArray = false) => {
-    console.log(reviewerUserId, seenArray, reviewArray)
+  flag: async (reviewerUserId, textMsgId, category) => {
+
+    let confirmedTextMsg = null;
+    switch (category) {
+      case "needs more context":
+        confirmedTextMsg = await TextMsgModel.findOneAndUpdate(
+          { _id: textMsgId },
+          { $push: { needsMoreContextFlag: reviewerUserId } },
+          { new: true }
+        );
+        break;
+      case "skip":
+        confirmedTextMsg = await TextMsgModel.findOneAndUpdate(
+          { _id: textMsgId },
+          { $push: { skippedFlag: reviewerUserId } },
+          { new: true }
+        );
+        break;
+      case "inappropriate":
+        confirmedTextMsg = await TextMsgModel.findOneAndUpdate(
+          { _id: textMsgId },
+          { $push: { inappropriateFlag: reviewerUserId } },
+          { new: true }
+        );
+        break;
+      default:
+        throw new BadInputError(`Unexpected category: ${category}`)
+    }
+
+    return confirmedTextMsg;
+  },
+  _clearReviewerFromAll: async (reviewerUserId, seenArray = false, reviewArray = false, inappropriateFlag = false, needsMoreContextFlag = false, skippedFlag = false) => {
+    console.log(reviewerUserId, seenArray, reviewArray, inappropriateFlag, needsMoreContextFlag, skippedFlag)
     try {
 
       let retrievedTextMsg;
@@ -103,10 +134,31 @@ module.exports = {
         );
       }
 
-      console.log(retrievedTextMsg, retrievedTextMsg2)
+      let retrievedInappropriateFlag;
+      if (inappropriateFlag) {
+        retrievedInappropriateFlag = await TextMsgModel.updateMany(
+          {},
+          { $pull: { inappropriateFlag: reviewerUserId } }
+        );
+      }
 
+      let retrievedNeedsMoreContextFlag;
+      if (needsMoreContextFlag) {
+        retrievedNeedsMoreContextFlag = await TextMsgModel.updateMany(
+          {},
+          { $pull: { needsMoreContextFlag: reviewerUserId } }
+        );
+      }
 
-      return { retrievedTextMsg, retrievedTextMsg2 };
+      let retrievedSkippedFlag;
+      if (skippedFlag) {
+        retrievedSkippedFlag = await TextMsgModel.updateMany(
+          {},
+          { $pull: { skippedFlag: reviewerUserId } }
+        );
+      }
+
+      return { retrievedTextMsg, retrievedTextMsg2, retrievedInappropriateFlag, retrievedNeedsMoreContextFlag, retrievedSkippedFlag};
     } catch (err) {
       console.log(err)
       throw `error: ${err}`
