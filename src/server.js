@@ -9,9 +9,10 @@ const textMsgsRouter = require('./routes/textMsgs.router');
 const sanityCheckRouter = require('./routes/sanityCheck.router');
 const userRouter = require('./routes/user.router');
 const authRouter = require('./routes/auth.router');
+const waitlistRouter = require('./routes/waitlist.router');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { errorHandler } = require('./middleware/errorHandler.middleware')
+const { errorHandler } = require('./middleware/errorHandler.middleware');
 
 var app = express();
 
@@ -37,6 +38,7 @@ app.use(sessionMiddleware.session);
 
 // routes
 app.use('/', sanityCheckRouter);
+app.use('/', waitlistRouter);
 app.use('/api', s3UploadRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/textMsgs', textMsgsRouter);
