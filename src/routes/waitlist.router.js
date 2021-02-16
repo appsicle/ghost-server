@@ -46,7 +46,7 @@ router.post(
       await new WaitlistModel({ email }).save();
       res.status(200).send();
     } catch (err) {
-      res.status(400).send();
+      res.status(409).send();
     }
   }),
 );
