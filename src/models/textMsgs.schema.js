@@ -20,7 +20,7 @@ const textMsgSchema = new mongoose.Schema({
           name: String,
           profilePic: String,
         },
-        reviewContent: [{ question: String, answer: String }],
+        reviewContent: String,
       },
     ],
     default: [],

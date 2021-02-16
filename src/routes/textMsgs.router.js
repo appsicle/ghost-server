@@ -72,7 +72,7 @@ router.post(
       .withMessage('required')
       .bail()
       .custom(isObjectId),
-    body('reviewContent').exists().withMessage('required').bail().isArray(),
+    body('reviewContent').exists().withMessage('required').bail().isString(),
   ]),
   wrapAsync(async (req, res) => {
     const { textMsgId, reviewContent } = req.body;
