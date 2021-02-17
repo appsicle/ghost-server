@@ -1,6 +1,5 @@
 const { StatusCodeError, BadInputError } = require("../errors");
 const TextMsgModel = require("../models/textMsgs.schema");
-const sendGridService = require("../services/sendGrid.service");
 
 module.exports = {
   save: async (userObj, additionalInfo, imageURLs) => {
