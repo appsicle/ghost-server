@@ -16,6 +16,12 @@ router.post(
   isLoggedIn,
   hasRole('REVIEWEE'),
   validate([
+    body('title').exists().withMessage('required').bail().isString(),
+    body('type')
+      .exists()
+      .withMessage('required')
+      .bail()
+      .isIn(['TEXT_MSG', 'DATING_PROFILE']),
     body('additionalInfo').exists().withMessage('required').bail().isString(),
     body('imageURLs')
       .exists()
@@ -25,42 +31,55 @@ router.post(
       .notEmpty(),
   ]),
   wrapAsync(async (req, res) => {
-    const { additionalInfo, imageURLs } = req.body;
+    const { title, type, additionalInfo, imageURLs } = req.body;
 
     console.log(
       `Endpoint: "textMsgs/submit", recieved: ${JSON.stringify(req.body)}`,
     );
 
-    const confirmedTextMsg = await TextMsgsService.save(
+    await TextMsgsService.save(
       req.session.user,
+      title,
+      type,
       additionalInfo,
       imageURLs,
     );
 
-    return res.json({ confirmedTextMsg });
+    return res.status(200).send();
   }),
 );
 
-router.get(
-  '/retrieve',
-  isLoggedIn,
-  validate([
-    query('textMsgId')
-      .exists()
-      .withMessage('required')
-      .bail()
-      .custom(isObjectId),
-  ]),
-  wrapAsync(async (req, res) => {
-    const { textMsgId } = req.query;
+// DEPRECATING IF NOT NEEDED
+// router.get(
+//   '/retrieve',
+//   isLoggedIn,
+//   validate([
+//     query('textMsgId')
+//       .exists()
+//       .withMessage('required')
+//       .bail()
+//       .custom(isObjectId),
+//   ]),
+//   wrapAsync(async (req, res) => {
+//     const { textMsgId } = req.query;
 
-    console.log(`Endpoint: "textMsgs/retrieve", recieved: ${textMsgId}`);
+//     console.log(`Endpoint: "textMsgs/retrieve", recieved: ${textMsgId}`);
 
-    const retrievedTextMsg = await TextMsgsService.retrieve(textMsgId);
+//     const retrievedTextMsg = await TextMsgsService.retrieve(textMsgId);
 
-    return res.json({ retrievedTextMsg });
-  }),
-);
+//     const projectedTextMsg = {
+//       revieweeObj: retrievedTextMsg.revieweeObj,
+//       title: retrievedTextMsg.title,
+//       type: retrievedTextMsg.type,
+//       additionalInfo: retrievedTextMsg.additionalInfo,
+//       imageURLs: retrievedTextMsg.imageURLs,
+//       reviews: retrievedTextMsg.reviews,
+//       status: retrievedTextMsg.status,
+//     };
+
+//     return res.json(projectedTextMsg);
+//   }),
+// );
 
 router.post(
   '/review',
@@ -81,13 +100,9 @@ router.post(
       `Endpoint: "textMsgs/review", recieved: ${JSON.stringify(req.body)}`,
     );
 
-    const confirmedTextMsg = await TextMsgsService.review(
-      req.session.user,
-      textMsgId,
-      reviewContent,
-    );
+    await TextMsgsService.review(req.session.user, textMsgId, reviewContent);
 
-    return res.json({ confirmedTextMsg });
+    return res.status(200).send();
   }),
 );
 
@@ -111,8 +126,15 @@ router.post(
       lastTextMsgId,
     );
 
-    console.log(retrievedTextMsg);
-    return res.json(retrievedTextMsg);
+    const projectedTextMsg = {
+      revieweeObj: retrievedTextMsg.revieweeObj,
+      title: retrievedTextMsg.title,
+      type: retrievedTextMsg.type,
+      additionalInfo: retrievedTextMsg.additionalInfo,
+      imageURLs: retrievedTextMsg.imageURLs,
+    };
+
+    return res.json(projectedTextMsg);
   }),
 );
 
