@@ -6,7 +6,7 @@ module.exports = {
     secret: "uberubersecretsecretthingy",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false, domain: process.env.FRONTEND_DOMAIN }, // add domain
+    cookie: { secure: true, sameSite: 'none', domain: process.env.FRONTEND_DOMAIN }, // add domain
     store: new MongoStore({
       url: process.env.MONGODB_URI,
       ttl: 24 * 60 * 60 // 1 day
